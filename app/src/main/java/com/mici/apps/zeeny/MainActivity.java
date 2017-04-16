@@ -2,13 +2,20 @@ package com.mici.apps.zeeny;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Toast;
+
+import java.io.File;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -23,14 +30,56 @@ public class MainActivity extends AppCompatActivity {
 
         /** helpful references */
         Button click = (Button)findViewById(R.id.sendButton);
-        image = (ImageView)findViewById(R.id.cameraView);
-
         click.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendImage();
+            }
+        });
+
+        image = (ImageView)findViewById(R.id.cameraView);
+        image.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 dispatchTakePictureIntent();
             }
         });
+    }
+
+    /**
+     * mici API
+     */
+
+    public void sendImage() {
+        Log.i("Send email", "");
+
+        Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
+        EditText doctorEditText = (EditText)findViewById(R.id.doctorEmailEditText);
+
+        String to [] = { doctorEditText.getText().toString() };
+        emailIntent.setData(Uri.parse("mailto:"));
+        emailIntent.setType("text/plain");
+
+        emailIntent.putExtra(Intent.EXTRA_EMAIL, to );
+        emailIntent.putExtra(Intent.EXTRA_CC, "");
+        emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Slika grla");
+        emailIntent.putExtra(Intent.EXTRA_TEXT, "evo slike grla"+"\n\n"+"Mici");
+
+        try {
+            startActivity(Intent.createChooser(emailIntent, "Send e-mail with"));
+            finish();
+            Log.i("Sending email done", "");
+
+        } catch (android.content.ActivityNotFoundException ex) {
+            Toast.makeText(MainActivity.this,
+                    "There is no e-mail client installed.", Toast.LENGTH_SHORT).show();
+        }
+
+//        emailIntent.setType("image/jpeg");
+//        File bitmapFile = new File(Environment.getExternalStorageDirectory()+
+//                "/"+FOLDER_NAME+"/picture.jpg");
+//        myUri = Uri.fromFile(bitmapFile);
+//        emailIntent.putExtra(Intent.EXTRA_STREAM, myUri);
     }
 
     /**
