@@ -46,7 +46,6 @@
         style="@style/Widget.AppCompat.Button.Borderless"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
         android:elevation="0dp"
         android:text="SEND"
         android:textAlignment="center"
@@ -55,19 +54,9 @@
         android:visibility="visible"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView2" />
-
-    <TextView
-        android:id="@+id/textView2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
-        android:text="Use Volume Up button to take the picture"
-        android:textColor="@android:color/white"
-        android:textSize="18sp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/doctorEmailEditText" />
+        app:layout_constraintTop_toBottomOf="@+id/doctorEmailEditText"
+        app:layout_constraintHorizontal_bias="0.501" />
 
     <ImageView
         android:id="@+id/cameraView"
