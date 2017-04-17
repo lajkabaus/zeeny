@@ -3,6 +3,7 @@ package com.mici.apps.zeeny;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.camera2.CameraAccessException;
@@ -56,6 +57,9 @@ public class MainActivity extends AppCompatActivity
     private static CameraManager _cameraManager = null;
     private static String _cameraId = "";
 
+    private String _pickedEmail = "";
+    private String _pickedName  = "";
+
     private String _lastImageName = "";
     private Uri _lastImageUri;
     private static final String appName = "Zeeny";
@@ -84,7 +88,6 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View v)
             {
-                checkCameraPermissions();
                 createImage();
             }
         });
@@ -141,29 +144,42 @@ public class MainActivity extends AppCompatActivity
 
         Log.i("Send email", "");
 
-        Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
+        Intent sendIntent = new Intent(android.content.Intent.ACTION_SEND);
         EditText drInput = (EditText)findViewById(R.id.doctorEmailEditText);
 
-        String to [] = { drInput.getText().toString() };
-        emailIntent.setData(Uri.parse("mailto:"));
-        emailIntent.setType("image/jpeg");
+        sendIntent.setData(Uri.parse("mailto:"));
+        sendIntent.setType("image/jpeg");
 
-        emailIntent.putExtra(Intent.EXTRA_EMAIL, to );
-        emailIntent.putExtra(Intent.EXTRA_CC, "");
-        emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Slika grla");
-        emailIntent.putExtra(Intent.EXTRA_TEXT, "Evo slike grla."+"\n\n"+"Mici");
-        emailIntent.putExtra(Intent.EXTRA_STREAM, _lastImageUri);
+        String[] to = new String[1];
+
+        if ( true == _pickedEmail.isEmpty() )
+        {
+            to[0] = drInput.getText().toString();
+        }
+        else
+        {
+            to[0] = _pickedEmail;
+        }
+        sendIntent.putExtra(Intent.EXTRA_EMAIL, to);
+
+        sendIntent.putExtra(Intent.EXTRA_CC, "");
+        sendIntent.putExtra(Intent.EXTRA_SUBJECT, "Slika grla");
+        sendIntent.putExtra(Intent.EXTRA_TEXT, "Dragi/a " + _pickedName + ",\n\nEvo slike grla."+"\n\n"+"Hvala,\nMici");
+        sendIntent.putExtra(Intent.EXTRA_STREAM, _lastImageUri);
 
         try
         {
-            startActivity(Intent.createChooser(emailIntent, "Send e-mail with"));
-            finish();
+            startActivity( Intent.createChooser(sendIntent, "Send e-mail with") );
 
-        } catch (android.content.ActivityNotFoundException ex) {
+        }
+        catch (android.content.ActivityNotFoundException ex)
+        {
             Toast.makeText(this, "There is no e-mail client installed.", Toast.LENGTH_SHORT).show();
         }
 
         _lastImageName = "";
+        _pickedEmail   = "";
+        _pickedName    = "";
     }
 
     /* Checks if external storage is available for read and write */
@@ -288,6 +304,7 @@ public class MainActivity extends AppCompatActivity
 
     private void createImage()
     {
+        checkCameraPermissions();
         if ( false == _hasPermission_camera )
         {
             Toast.makeText(this, "Camera usage not allowed", Toast.LENGTH_SHORT).show();
@@ -456,6 +473,30 @@ public class MainActivity extends AppCompatActivity
 
     }
 
+    private void getContact(Intent data)
+    {
+        Cursor cursor = null;
+        try
+        {
+            Uri uri = data.getData();
+            //Query the content uri
+            cursor = getContentResolver().query(uri, null, null, null, null);
+            cursor.moveToFirst();
+
+            // column index of the phone number
+            int emailIdx = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.ADDRESS);
+            _pickedEmail = cursor.getString(emailIdx);
+
+            // column index of the contact name
+            int nameIndex =cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
+            _pickedName  = cursor.getString(nameIndex);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * activity callbacks
      * @param requestCode
@@ -504,6 +545,7 @@ public class MainActivity extends AppCompatActivity
                 if ( RESULT_OK == resultCode )
                 {
                     /** send the image */
+                    getContact(data);
                     sendImage();
                 }
                 break;
