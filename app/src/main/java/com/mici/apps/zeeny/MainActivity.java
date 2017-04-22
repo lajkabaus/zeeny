@@ -331,6 +331,10 @@ public class MainActivity extends AppCompatActivity
             // Continue only if a file was successfully created
             if ( null != photoFile )
             {
+                /** turn flash OFF */
+                turnFlashON();
+
+                /** start the camera */
                 takePictureIntent.putExtra( MediaStore.EXTRA_OUTPUT, _lastImageUri );
                 startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
             }
@@ -513,6 +517,9 @@ public class MainActivity extends AppCompatActivity
             {
                 if ( RESULT_OK == resultCode )
                 {
+                    /** turn flash OFF */
+                    turnFlashOFF();
+
                     /** set thumbnail */
                     Bundle extras = data.getExtras();
 
